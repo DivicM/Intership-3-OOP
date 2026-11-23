@@ -1,0 +1,1 @@
+﻿public enum StateOfReservation { Confirmed, Cancelled, Completed}
