@@ -1,4 +1,5 @@
-﻿public class Reservation : Entity
+﻿
+public class Reservation : Entity
 {
     public const int MinHoursBeforeArrival = 48;
 
@@ -10,23 +11,49 @@
     public decimal FinalPrice { get; private set; }
     public StateOfReservation Status { get; private set; }
 
+    public Reservation (Guest guest, Room room, DateTime dateOfArrival, DateTime dateOfLeaving)
+    {
+
+        if(guest == null) throw new ArgumentException("Gost je obavezan");
+
+        if (room == null) throw new ArgumentException("Soba je obavezna");
+
+        Guest = guest;
+        Room = room;
+        Status = StateOfReservation.Confirmed;
+        ChangeDate(dateOfArrival, dateOfLeaving);
+    }
+
+
     public void ChangeDate(DateTime arrival, DateTime leaving)
     {
-        DateOfArrival = arrival;
-        DateOfLeaving = leaving;
+        if (Status != StateOfReservation.Confirmed)
+            throw new ArgumentException("Mogu se mijenjati samo potvrđene rezervacije.");
+        if (leaving.Date <= arrival.Date)
+            throw new ArgumentException("Datum odlaska mora biti nakon datuma dolaska.");
 
+        DateOfArrival = arrival.Date;
+        DateOfLeaving = leaving.Date;
         FinalPrice = NightsOfStay * Room.PricePerNight;
         MakeChange();
     }
-    public void Cancel()
+    public bool Cancel()
     {
+        if (Status != StateOfReservation.Confirmed)
+            return false;
+
         Status = StateOfReservation.Cancelled;
         MakeChange();
+        return true;
     }
-    public void Complete()
+    public bool Complete()
     {
-        Status=StateOfReservation.Completed;
+        if (Status != StateOfReservation.Confirmed)
+            return false;
+
+        Status = StateOfReservation.Completed;
         MakeChange();
+        return true;
     }
     public bool ViseOd48hDoDolaska() => DateOfArrival - DateTime.Now > TimeSpan.FromHours(MinHoursBeforeArrival);
 

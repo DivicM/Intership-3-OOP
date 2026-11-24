@@ -8,15 +8,16 @@
         :base (name, surname, birthYear)
     {
 
-        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        if (!IsValidEmail(email))
             throw new ArgumentException("Neispravan mail!");
-        if (password.Length < 6 || password == null)
+        if (password.Length < MinPasswordLength || password == null)
             throw new ArgumentException("Lozinka mora imati barem 6 znakova");
 
         Email = email.Trim().ToLower();
         this.password = password;
 
     }
+    public const int MinPasswordLength = 6;
 
     public IReadOnlyList<Room> Favourites => favourites;
 
@@ -43,4 +44,15 @@
         return true;
     }
 
+    public static bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        var at = email.IndexOf('@');
+        return at > 0                                  
+            && at == email.LastIndexOf('@')            
+            && email.LastIndexOf('.') > at + 1         
+            && !email.EndsWith('.');
+    }
 }
